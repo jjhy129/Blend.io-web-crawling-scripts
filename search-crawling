@@ -1,0 +1,58 @@
+// List of tags and keywords to search for
+const tagsAndKeywords = [
+    '#House', '#Electronic', '#Bass', '#Ambient', '#Midi', '#Synth', '#Instrumental', '#Edm', 
+    '#Hip Hop', '#Remix', '#Drums', '#Deep House', '#Dance', '#Berklee Online', '#Electro', 
+    '#Experimental', '#Techno', '#Beats', '#Funk', '#Coursera', 'House', 'Electronic', 'Bass', 
+    'Ambient', 'Midi', 'Synth', 'Instrumental', 'Edm', 'Hip Hop', 'Remix', 'Drums', 'Deep House', 
+    'Dance', 'Berklee Online', 'Electro', 'Experimental', 'Techno', 'Beats', 'Funk', 'Coursera'
+];
+
+// Function to perform search and click pull buttons
+async function searchAndPull(tagOrKeyword) {
+    const searchUrl = `https://blend.io/search?q=${encodeURIComponent(tagOrKeyword)}`;
+    console.log(`Searching for ${tagOrKeyword} at ${searchUrl}`);
+    const response = await fetch(searchUrl);
+    const text = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    
+    const pullLinks = doc.querySelectorAll('a.cloned.small-btn');
+    if (pullLinks.length === 0) {
+        console.log(`No 'pull' links found for ${tagOrKeyword}.`);
+        return;
+    }
+
+    pullLinks.forEach((link, index) => {
+        setTimeout(async () => {
+            const url = 'https://blend.io' + link.getAttribute('href');
+            console.log(`Processing pull link for ${tagOrKeyword}: ${url}`);
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                console.log(`JSON response for ${tagOrKeyword}:`, data);
+                if (data.redirect) {
+                    const redirectUrl = 'https://blend.io' + data.redirect;
+                    window.open(redirectUrl, '_blank');
+                    console.log(`Opened 'pull' link for ${tagOrKeyword} in a new tab: ${redirectUrl}`);
+                } else if (data.msg && data.msg.includes("already pulled")) {
+                    console.log(`Project for ${tagOrKeyword} already pulled: ${url}`);
+                } else {
+                    console.log(`No redirection URL found for ${tagOrKeyword}.`);
+                }
+            } catch (error) {
+                console.error(`Error processing 'pull' link for ${tagOrKeyword}:`, error);
+            }
+        }, index * 1000); // Adjust the delay (1000ms = 1 second) as needed
+    });
+}
+
+// Function to iterate through all tags and keywords
+async function processTagsAndKeywords() {
+    for (let i = 0; i < tagsAndKeywords.length; i++) {
+        const tagOrKeyword = tagsAndKeywords[i];
+        await searchAndPull(tagOrKeyword);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Adjust delay between searches if necessary
+    }
+}
+
+processTagsAndKeywords();
