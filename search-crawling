@@ -10,6 +10,7 @@ const tagsAndKeywords = [
 // Function to perform search and click pull buttons
 async function searchAndPull(tagOrKeyword) {
     const searchUrl = `https://blend.io/search?q=${encodeURIComponent(tagOrKeyword)}`;
+    console.log(`Searching for ${tagOrKeyword} at ${searchUrl}`);
     const response = await fetch(searchUrl);
     const text = await response.text();
     const parser = new DOMParser();
@@ -24,13 +25,15 @@ async function searchAndPull(tagOrKeyword) {
     pullLinks.forEach((link, index) => {
         setTimeout(async () => {
             const url = 'https://blend.io' + link.getAttribute('href');
+            console.log(`Processing pull link for ${tagOrKeyword}: ${url}`);
             try {
                 const response = await fetch(url);
                 const data = await response.json();
+                console.log(`JSON response for ${tagOrKeyword}:`, data);
                 if (data.redirect) {
                     const redirectUrl = 'https://blend.io' + data.redirect;
                     window.open(redirectUrl, '_blank');
-                    console.log(`Opened 'pull' link for ${tagOrKeyword} in a new tab.`);
+                    console.log(`Opened 'pull' link for ${tagOrKeyword} in a new tab: ${redirectUrl}`);
                 } else {
                     console.log(`No redirection URL found for ${tagOrKeyword}.`);
                 }
