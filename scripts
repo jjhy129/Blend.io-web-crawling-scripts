@@ -1,0 +1,49 @@
+// Function to click the "load more" button 10 times to load more projects
+function loadMoreProjects() {
+    const loadMoreButton = document.querySelector('.btn-sub.load-more');
+    if (!loadMoreButton) {
+        console.log("No more 'load more' buttons found.");
+        return;
+    }
+    for (let i = 0; i < 10; i++) {
+        setTimeout(() => {
+            loadMoreButton.click();
+            console.log(`Clicked 'load more' ${i + 1} time(s).`);
+        }, i * 1000); // Adjust the delay (1000ms = 1 second) as needed
+    }
+}
+
+// Function to open all "pull" links and handle redirection
+async function openAllPullLinks() {
+    const pullLinks = document.querySelectorAll('a.clone.action-button');
+    if (pullLinks.length === 0) {
+        console.log("No 'pull' links found.");
+        return;
+    }
+
+    for (let index = 0; index < pullLinks.length; index++) {
+        const link = pullLinks[index];
+        setTimeout(async () => {
+            const url = 'https://blend.io' + link.getAttribute('href');
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.redirect) {
+                    const redirectUrl = 'https://blend.io' + data.redirect;
+                    window.open(redirectUrl, '_blank');
+                    console.log(`Opened 'pull' link for project ${index + 1} in a new tab.`);
+                } else {
+                    console.log(`No redirection URL found for project ${index + 1}.`);
+                }
+            } catch (error) {
+                console.error(`Error processing 'pull' link for project ${index + 1}:`, error);
+            }
+        }, index * 1000); // Adjust the delay (1000ms = 1 second) as needed
+    }
+}
+
+// Load more projects first, then open all pull links
+loadMoreProjects();
+
+// Give some time for all projects to load before opening pull links
+setTimeout(openAllPullLinks, 15000); // Adjust the delay as needed to ensure all projects are loaded
